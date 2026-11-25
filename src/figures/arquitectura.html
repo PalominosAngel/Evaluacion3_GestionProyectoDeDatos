@@ -1,0 +1,174 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Arquitectura de la solución</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    width: 1500px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #16243D;
+    background: #FFFFFF;
+    padding: 44px 48px 40px;
+  }
+
+  .head { margin-bottom: 30px; }
+  .head h1 { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+  .head p { font-size: 15.5px; color: #6B7A90; margin-top: 7px; }
+
+  .flow { display: flex; align-items: stretch; gap: 0; }
+
+  .stage { flex: 1; display: flex; flex-direction: column; }
+
+  .stage-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .num {
+    width: 27px; height: 27px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .stage-head h2 { font-size: 16.5px; font-weight: 700; }
+
+  .box {
+    border: 1px solid #E0E7F0; border-top: 4px solid;
+    border-radius: 9px; padding: 15px 16px; background: #FBFCFE;
+    flex: 1; display: flex; flex-direction: column; gap: 10px;
+  }
+
+  .card {
+    background: #fff; border: 1px solid #E7EDF5; border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .card .t { font-size: 13.5px; font-weight: 700; margin-bottom: 3px; }
+  .card .d { font-size: 12px; color: #6B7A90; line-height: 1.45; }
+
+  ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  li { font-size: 12.6px; color: #33415C; line-height: 1.42; padding-left: 14px; position: relative; }
+  li::before {
+    content: ""; position: absolute; left: 0; top: 6px;
+    width: 5px; height: 5px; border-radius: 50%; background: #A9BCD4;
+  }
+
+  .arrow {
+    width: 46px; display: flex; align-items: center; justify-content: center;
+    padding-top: 46px; flex-shrink: 0;
+  }
+  .arrow svg { display: block; }
+
+  .s1 .num { background: #4A7DBF; } .s1 .box { border-top-color: #4A7DBF; }
+  .s2 .num { background: #3E9E86; } .s2 .box { border-top-color: #3E9E86; }
+  .s3 .num { background: #E08A3C; } .s3 .box { border-top-color: #E08A3C; }
+  .s4 .num { background: #7A5FA8; } .s4 .box { border-top-color: #7A5FA8; }
+
+  .note {
+    margin-top: 26px; background: #16243D; color: #fff;
+    border-radius: 9px; padding: 16px 22px;
+    font-size: 13.5px; line-height: 1.5;
+  }
+  .note b { color: #8FB6E8; }
+
+  .foot {
+    margin-top: 14px; font-size: 11.5px; color: #93A2B5;
+    display: flex; justify-content: space-between;
+  }
+</style>
+
+<div class="head">
+  <h1>Arquitectura de la solución de visualización</h1>
+  <p>Del dato de origen a la decisión de negocio · StreamView Analytics</p>
+</div>
+
+<div class="flow">
+
+  <div class="stage s1">
+    <div class="stage-head"><div class="num">1</div><h2>Fuentes de datos</h2></div>
+    <div class="box">
+      <div class="card">
+        <div class="t">Netflix Movies</div>
+        <div class="d">16.000 registros · 18 variables<br>Incluye presupuesto e ingresos</div>
+      </div>
+      <div class="card">
+        <div class="t">Netflix TV Shows</div>
+        <div class="d">16.000 registros · 16 variables<br>Sin variables financieras</div>
+      </div>
+      <ul>
+        <li>Archivos CSV almacenados en <i>data/raw</i></li>
+        <li>Ambos comparten 11 variables comunes</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <svg width="26" height="16" viewBox="0 0 26 16"><path d="M0 8h20M15 2l6 6-6 6" stroke="#A9BCD4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="stage s2">
+    <div class="stage-head"><div class="num">2</div><h2>Integración y depuración</h2></div>
+    <div class="box">
+      <div class="card">
+        <div class="t">data_loader.py</div>
+        <div class="d">Unifica ambas fuentes en una sola tabla de 32.000 títulos</div>
+      </div>
+      <ul>
+        <li>Se marcan los títulos sin votos, cuyo <i>vote_average</i> es cero por ausencia de valoración</li>
+        <li>Se identifican las películas con presupuesto e ingresos superiores a cero</li>
+        <li>Los géneros y países se separan en valores individuales para su análisis</li>
+        <li>El resultado se mantiene en memoria mediante <i>cache</i></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <svg width="26" height="16" viewBox="0 0 26 16"><path d="M0 8h20M15 2l6 6-6 6" stroke="#A9BCD4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="stage s3">
+    <div class="stage-head"><div class="num">3</div><h2>Dashboard interactivo</h2></div>
+    <div class="box">
+      <div class="card">
+        <div class="t">Streamlit + Plotly</div>
+        <div class="d">Cinco indicadores clave y tres vistas de análisis</div>
+      </div>
+      <ul>
+        <li>Composición del catálogo</li>
+        <li>Desempeño de contenidos</li>
+        <li>Dimensión financiera</li>
+        <li>Filtros por tipo, género, país, idioma, clasificación y año</li>
+        <li>Control de calidad de datos para excluir títulos sin votos</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <svg width="26" height="16" viewBox="0 0 26 16"><path d="M0 8h20M15 2l6 6-6 6" stroke="#A9BCD4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="stage s4">
+    <div class="stage-head"><div class="num">4</div><h2>Decisiones de negocio</h2></div>
+    <div class="box">
+      <div class="card">
+        <div class="t">Gerente de Contenidos</div>
+        <div class="d">Audiencia objetivo de la solución</div>
+      </div>
+      <ul>
+        <li>Adquisición de nuevos contenidos</li>
+        <li>Renovación de títulos existentes</li>
+        <li>Posicionamiento dentro del catálogo</li>
+        <li>Identificación de géneros con potencial de crecimiento</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="note">
+  Cada etapa deja registro de las decisiones aplicadas sobre los datos. De esta manera, cualquier cifra
+  presentada en el dashboard puede rastrearse hasta la fuente y el criterio que la originó, lo que permite
+  <b>reproducir el análisis completo</b> sin depender de pasos manuales.
+</div>
+
+<div class="foot">
+  <span>Evaluación Parcial 3 — Visualización de Datos (ADY1104)</span>
+  <span>StreamView Analytics</span>
+</div>
