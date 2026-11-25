@@ -1,4 +1,4 @@
-# StreamView Analytics — dashboard dependencies
+# Mall Customers Analytics — dashboard dependencies
 streamlit==1.58.0
 plotly==6.8.0
 pandas==3.0.2

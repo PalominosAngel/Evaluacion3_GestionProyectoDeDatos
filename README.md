@@ -53,12 +53,10 @@ proyecto/
 ├── src/
 │   ├── data_loader.py                 Carga y preparación de datos
 │   ├── model.py                       Modelo K-Means compartido
-│   ├── theme.py                       Sistema visual y estilos
-│   ├── capture_dashboard.js           Utilidad para capturas
-│   ├── render_figures.js              Utilidad para renderizar figuras
-│   └── figures/
+│   └── theme.py                       Sistema visual y estilos
 │
-├── images/
+├── tests/
+│   └── test_dashboard.py              Pruebas de filtros y privacidad (RNF01)
 │
 ├── run.sh                             Lanzador macOS / Linux
 ├── run.bat                            Lanzador Windows
@@ -171,6 +169,16 @@ pip install -r requirements.txt
 streamlit run dashboard/app.py
 ```
 
+### Ejecutar las pruebas
+
+Con el entorno activado, desde la carpeta del proyecto:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Las pruebas recorren los filtros, el botón «Restablecer filtros», una selección sin clientes y la regla de privacidad RNF01 (ninguna tabla ni gráfico muestra `CustomerID`).
+
 ---
 
 # Fuente de datos
@@ -217,6 +225,8 @@ El proceso mantiene los **200 registros originales** y evita realizar eliminacio
 `CustomerID` se conserva únicamente como identificador.
 
 No participa en el modelo K-Means, debido a que no representa una característica del comportamiento del cliente.
+
+Tampoco se muestra en el dashboard: según el requisito RNF01, el reporte compartido presenta solo resultados agregados, sin identificadores ni fichas individuales.
 
 ---
 
@@ -600,7 +610,7 @@ y:
 Spending Score
 ```
 
-Incluye visualizaciones de dispersión y comparaciones de comportamiento entre clientes.
+Incluye visualizaciones de dispersión, promedios por género y un perfil agregado por tramo de Spending Score (cantidad de clientes, edad e ingreso promedio). No se muestran rankings de clientes individuales.
 
 Esta vista permite identificar visualmente patrones que posteriormente son utilizados por el modelo de segmentación.
 
