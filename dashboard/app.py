@@ -314,11 +314,8 @@ with view_behavior:
             color="gender_label",
             color_discrete_map=GENDER_COLORS,
             opacity=0.75,
-            hover_name="customer_id",
+            # RNF01: no CustomerID or per-customer profile fields in the hover.
             hover_data={
-                "age": True,
-                "education": True,
-                "marital_status": True,
                 "annual_income_k": ":.0f",
                 "spending_score": ":.0f",
             },
@@ -354,33 +351,33 @@ with view_behavior:
         unsafe_allow_html=True,
     )
 
-    st.markdown("##### Clientes con mayor Spending Score")
-    ranking = (
-        filtered.sort_values(["spending_score", "annual_income_k"], ascending=False)
-        .head(15)[
-            [
-                "customer_id",
-                "gender_label",
-                "age",
-                "education",
-                "marital_status",
-                "annual_income_k",
-                "spending_score",
-            ]
-        ]
-        .rename(
-            columns={
-                "customer_id": "CustomerID",
-                "gender_label": "Género",
-                "age": "Edad",
-                "education": "Educación",
-                "marital_status": "Estado civil",
-                "annual_income_k": "Ingreso anual (k$)",
-                "spending_score": "Spending Score",
-            }
-        )
+    # RNF01: aggregated bands replace the former per-customer ranking table.
+    st.markdown("##### Perfil agregado por tramo de Spending Score")
+    spending_bands = pd.cut(
+        filtered["spending_score"],
+        bins=[0, 20, 40, 60, 80, 100],
+        labels=["1–20", "21–40", "41–60", "61–80", "81–100"],
     )
-    st.dataframe(ranking, width="stretch", hide_index=True)
+    band_summary = (
+        filtered.assign(band=spending_bands)
+        .groupby("band", observed=True)
+        .agg(
+            Clientes=("spending_score", "size"),
+            Edad_promedio=("age", "mean"),
+            Ingreso_promedio=("annual_income_k", "mean"),
+        )
+        .reset_index()
+        .rename(columns={"band": "Tramo de Spending Score"})
+    )
+    st.dataframe(
+        band_summary,
+        width="stretch",
+        hide_index=True,
+        column_config={
+            "Edad_promedio": st.column_config.NumberColumn("Edad promedio", format="%.1f"),
+            "Ingreso_promedio": st.column_config.NumberColumn("Ingreso promedio (k$)", format="%.1f"),
+        },
+    )
 
 # ---------------------------------------------------- view 3 · clusters ----
 
@@ -400,12 +397,10 @@ with view_segments:
             y="spending_score",
             color="cluster",
             opacity=0.82,
-            hover_name="customer_id",
+            # RNF01: no CustomerID or per-customer profile fields in the hover.
             hover_data={
-                "age": True,
-                "gender_label": True,
-                "education": True,
-                "marital_status": True,
+                "annual_income_k": ":.0f",
+                "spending_score": ":.0f",
             },
             title="Clusters sobre ingreso y Spending Score",
         )
